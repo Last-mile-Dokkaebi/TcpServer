@@ -47,7 +47,7 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
         buff.writeBytes(mBuf);
         if(buff.isReadable()) {
             String receive = buff.readCharSequence(buff.readableBytes(),StandardCharsets.UTF_8).toString();
-            buff = null;
+            buff = ctx.alloc().buffer(DATA_LENGTH);
             log.info("receive: "+ receive);
             if (receive.startsWith("AA")) {
                 BatteryDao batteryDao = new BatteryDao(receive);
