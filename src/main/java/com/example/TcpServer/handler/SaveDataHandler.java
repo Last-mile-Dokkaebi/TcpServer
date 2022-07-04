@@ -49,7 +49,7 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
             String receive = buff.readCharSequence(buff.readableBytes(),StandardCharsets.UTF_8).toString();
             buff = ctx.alloc().buffer(DATA_LENGTH);
             log.info("receive: "+ receive);
-            if (receive.startsWith("AA")) {
+            if (receive.startsWith("AA") && receive.endsWith("FF")) {
                 BatteryDao batteryDao = new BatteryDao(receive);
                 batteryRepo.save(batteryDao.toEntity());
                 ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKAAFF".getBytes()));
@@ -58,6 +58,8 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
             } else if (receive.substring(6, 8).equals("DD")) {
                 ChannelFuture f = ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKDDFF".getBytes()));
                 f.addListener(ChannelFutureListener.CLOSE);
+            } else if (!receive.startsWith("AA")) {
+                ctx.disconnect();
             }
         }
         mBuf.release();
