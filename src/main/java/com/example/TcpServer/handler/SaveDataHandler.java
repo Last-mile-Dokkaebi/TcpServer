@@ -49,15 +49,25 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
             String receive = buff.readCharSequence(buff.readableBytes(),StandardCharsets.UTF_8).toString();
             buff = ctx.alloc().buffer(DATA_LENGTH);
             log.info("receive: "+ receive);
-            if (receive.startsWith("AA")) {
+            if (receive.startsWith("AA") && receive.endsWith("FF")) {
                 BatteryDao batteryDao = new BatteryDao(receive);
                 batteryRepo.save(batteryDao.toEntity());
                 ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKAAFF".getBytes()));
+                log.info("server send: BB0001OKAAFF");
+            } else if (receive.substring(6, 8).equals("PP")) {
+                ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKPPFF".getBytes()));
+                log.info("server send: BB0001OKPPFF");
+            } else if (receive.substring(6, 8).equals("SS")) {
+                ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKSSFF".getBytes()));
+                log.info("server send: BB0001OKSSFF");
             } else if (receive.substring(6, 8).equals("CC")) {
                 ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKCCFF".getBytes()));
+                log.info("server send: BB0001OKCCFF");
             } else if (receive.substring(6, 8).equals("DD")) {
                 ChannelFuture f = ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKDDFF".getBytes()));
                 f.addListener(ChannelFutureListener.CLOSE);
+            } else if (!receive.startsWith("AA")) {
+                ctx.disconnect();
             }
         }
         mBuf.release();
