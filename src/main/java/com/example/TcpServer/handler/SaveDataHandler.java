@@ -53,8 +53,16 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
                 BatteryDao batteryDao = new BatteryDao(receive);
                 batteryRepo.save(batteryDao.toEntity());
                 ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKAAFF".getBytes()));
+                log.info("server send: BB0001OKAAFF");
+            } else if (receive.substring(6, 8).equals("PP")) {
+                ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKPPFF".getBytes()));
+                log.info("server send: BB0001OKPPFF");
+            } else if (receive.substring(6, 8).equals("SS")) {
+                ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKSSFF".getBytes()));
+                log.info("server send: BB0001OKSSFF");
             } else if (receive.substring(6, 8).equals("CC")) {
                 ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKCCFF".getBytes()));
+                log.info("server send: BB0001OKCCFF");
             } else if (receive.substring(6, 8).equals("DD")) {
                 ChannelFuture f = ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKDDFF".getBytes()));
                 f.addListener(ChannelFutureListener.CLOSE);
