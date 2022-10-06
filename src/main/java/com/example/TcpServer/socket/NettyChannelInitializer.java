@@ -17,6 +17,7 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
     // 클라이언트 소켓 채널이 생성될 때 호출
     @Override
     protected void initChannel(SocketChannel ch) {
+        log.info("initChannel");
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast(handler);
     }
