@@ -1,7 +1,7 @@
 package com.example.TcpServer.handler;
 
-import com.example.TcpServer.domain.BatteryDao;
-import com.example.TcpServer.domain.BatteryRepo;
+import com.example.TcpServer.scooter.ScooterDao;
+import com.example.TcpServer.scooter.ScooterRepo;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -19,9 +18,11 @@ import java.util.HashMap;
 @ChannelHandler.Sharable
 @RequiredArgsConstructor
 public class SaveDataHandler extends ChannelInboundHandlerAdapter {
+
+    private final ScooterRepo scooterRepo;
+
     private int DATA_LENGTH = 1024;
     private ByteBuf buff;
-    private final BatteryRepo batteryRepo;
     private HashMap<String, Channel> channels = new HashMap<>();
     //@Value 필드 경우 object가 생성되고 난 후 주입되므로 private final 형식으로 정의를 하면 @RequiredArgsConstructor에 의해
     //자동주입시 해당 멤버가 Bean에 등록되지 않았다고 오류가 발생한다.
@@ -53,7 +54,6 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
      * channelhandler는 channel끼리 공유되므로 서버 채널에서 연결이 종료될때 buff가 null이 되어 다른 킥보드
      * 채널이 버퍼를 읽으려고 시도할때 오류가 발생했다.
      */
-    @Transactional
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg){
         ByteBuf mBuf = (ByteBuf) msg;
@@ -64,9 +64,10 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
             buff = ctx.alloc().buffer(DATA_LENGTH);
             log.info("receive: "+ receive);
             if (receive.startsWith("AA") && receive.endsWith("FF")) {
-                BatteryDao batteryDao = new BatteryDao(receive);
-                batteryRepo.save(batteryDao.toEntity());
-                ctx.writeAndFlush(Unpooled.wrappedBuffer("BB0001OKAAFF".getBytes()));
+                ScooterDao scooterDao = new ScooterDao(receive);
+                scooterRepo.saveScooter(scooterDao);
+                String response = "BB"+ scooterDao.getIdentity() + "OKAAFF";
+                ctx.writeAndFlush(Unpooled.wrappedBuffer(response.getBytes()));
             } else if (receive.startsWith("SS") && receive.endsWith("FF")) {
                 String bikeNum = receive.substring(2,6);
                 registerChannel(ctx,bikeNum);
