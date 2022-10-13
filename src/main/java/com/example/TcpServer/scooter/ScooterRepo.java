@@ -23,12 +23,12 @@ public class ScooterRepo {
         Connection con = null;                                     // 데이터 베이스와 연결을 위한 객체
         PreparedStatement pstmt = null;
 
-        String saveDriveScooterState = "insert into scooter_state(lat, lon, pow, shock,soc,stat,temp," +
-                "time,volt,scooter_id,current,drive_log_id) " +
+        String saveDriveScooterState = "insert into scooter_state(lat, lng, pow, shock,soc,stat,temp," +
+                "time,volt,current,speed,scooter_id,drive_log_id) " +
+                "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String saveNoneDriveScooterState = "insert into scooter_state(lat, lng, pow, shock, soc, stat," +
+                " temp, time, volt,current,speed, scooter_id) " +
                 "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        String saveNoneDriveScooterState = "insert into scooter_state(lat, lon, pow, shock, soc, stat," +
-                " temp, time, volt, scooter_id,current) " +
-                "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             ScooterInfo scooter = findScooter(scooterDao.getIdentity());
@@ -45,12 +45,12 @@ public class ScooterRepo {
                 // 3. PreParedStatement 객체 생성, 객체 생성시 SQL 문장 저장
                 if (activate_id != null && scooterDao.getPow().equals("01")) {
                     pstmt = con.prepareStatement(saveDriveScooterState);
-                    pstmt.setInt(12,activate_id);
+                    pstmt.setInt(13,activate_id);
                 } else {
                     pstmt = con.prepareStatement(saveNoneDriveScooterState);
                 }
                 pstmt.setDouble(1, scooterDao.getLat());
-                pstmt.setDouble(2, scooterDao.getLon());
+                pstmt.setDouble(2, scooterDao.getLng());
                 pstmt.setString(3, scooterDao.getPow());
                 pstmt.setInt(4, scooterDao.getShock());
                 pstmt.setInt(5, scooterDao.getSoc());
@@ -58,8 +58,10 @@ public class ScooterRepo {
                 pstmt.setInt(7, scooterDao.getTemp());
                 pstmt.setTimestamp(8,Timestamp.valueOf(LocalDateTime.now()));
                 pstmt.setDouble(9, scooterDao.getVolt());
-                pstmt.setInt(10,id);
-                pstmt.setDouble(11,scooterDao.getCurrent());
+                pstmt.setString(10,scooterDao.getCurrent());
+                pstmt.setInt(11,scooterDao.getSpeed());
+                pstmt.setInt(12,id);
+
 
                 // 5. SQL 문장을 실행하고 결과를 리턴 - SQL 문장 실행 후, 변경된 row 수 int type 리턴
                 pstmt.executeUpdate();

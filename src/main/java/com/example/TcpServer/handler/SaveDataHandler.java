@@ -68,7 +68,7 @@ public class SaveDataHandler extends ChannelInboundHandlerAdapter {
                 scooterRepo.saveScooter(scooterDao);
                 String response = "BB"+ scooterDao.getIdentity() + "OKAAFF";
                 ctx.writeAndFlush(Unpooled.wrappedBuffer(response.getBytes()));
-            } else if (receive.startsWith("SS") && receive.endsWith("FF")) {
+            } else if (receive.startsWith("SS") && receive.endsWith("FF")) { //TODO 무조건 끄고 시작하기 server 연결 유지 추가
                 String bikeNum = receive.substring(2,6);
                 registerChannel(ctx,bikeNum);
                 ctx.writeAndFlush(makeResponse(receive));
