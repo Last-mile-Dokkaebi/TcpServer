@@ -23,9 +23,11 @@ public class ScooterRepo {
         Connection con = null;                                     // 데이터 베이스와 연결을 위한 객체
         PreparedStatement pstmt = null;
 
-        String SQL1 = "insert into scooter_state(lat, lon, pow, shock,soc,stat,temp,time,volt,current,scooter_id,drive_log_id) " +
+        String saveDriveScooterState = "insert into scooter_state(lat, lon, pow, shock,soc,stat,temp," +
+                "time,volt,scooter_id,current,drive_log_id) " +
                 "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        String SQL2 = "insert into scooter_state(lat, lon, pow, shock, soc, stat, temp, time, volt, scooter_id,current) " +
+        String saveNoneDriveScooterState = "insert into scooter_state(lat, lon, pow, shock, soc, stat," +
+                " temp, time, volt, scooter_id,current) " +
                 "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
@@ -42,10 +44,10 @@ public class ScooterRepo {
 
                 // 3. PreParedStatement 객체 생성, 객체 생성시 SQL 문장 저장
                 if (activate_id != null && scooterDao.getPow().equals("01")) {
-                    pstmt = con.prepareStatement(SQL1);
+                    pstmt = con.prepareStatement(saveDriveScooterState);
                     pstmt.setInt(12,activate_id);
                 } else {
-                    pstmt = con.prepareStatement(SQL2);
+                    pstmt = con.prepareStatement(saveNoneDriveScooterState);
                 }
                 pstmt.setDouble(1, scooterDao.getLat());
                 pstmt.setDouble(2, scooterDao.getLon());
