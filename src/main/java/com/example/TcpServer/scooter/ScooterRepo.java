@@ -19,20 +19,21 @@ public class ScooterRepo {
     @Value("${password}")
     private String pw;
 
-    public void saveScooter(ScooterDao scooterDao) {
+    public boolean saveScooter(ScooterDao scooterDao) {
         Connection con = null;                                     // 데이터 베이스와 연결을 위한 객체
         PreparedStatement pstmt = null;
+        boolean start = false;
 
         String saveDriveScooterState = "insert into scooter_state(lat, lng, pow, shock,soc,stat,temp," +
-                "time,volt,current,speed,scooter_id,drive_log_id) " +
-                "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "time,volt,current,speed,scooter_id, altitude,drive_log_id) " +
+                "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String saveNoneDriveScooterState = "insert into scooter_state(lat, lng, pow, shock, soc, stat," +
-                " temp, time, volt,current,speed, scooter_id) " +
-                "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                " temp, time, volt,current,speed,scooter_id, altitude) " +
+                "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             ScooterInfo scooter = findScooter(scooterDao.getIdentity());
-            if(scooter.getId() != null){
+            if (scooter.getId() != null) {
                 Integer id = scooter.getId();
                 Integer activate_id = scooter.getActivate_id();
 
@@ -44,9 +45,11 @@ public class ScooterRepo {
 
                 // 3. PreParedStatement 객체 생성, 객체 생성시 SQL 문장 저장
                 if (activate_id != null && scooterDao.getPow().equals("01")) {
+                    start = true;
                     pstmt = con.prepareStatement(saveDriveScooterState);
-                    pstmt.setInt(13,activate_id);
+                    pstmt.setInt(14, activate_id);
                 } else {
+                    start = false;
                     pstmt = con.prepareStatement(saveNoneDriveScooterState);
                 }
                 pstmt.setDouble(1, scooterDao.getLat());
@@ -56,15 +59,17 @@ public class ScooterRepo {
                 pstmt.setInt(5, scooterDao.getSoc());
                 pstmt.setString(6, scooterDao.getStat());
                 pstmt.setInt(7, scooterDao.getTemp());
-                pstmt.setTimestamp(8,Timestamp.valueOf(LocalDateTime.now()));
+                pstmt.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
                 pstmt.setDouble(9, scooterDao.getVolt());
-                pstmt.setString(10,scooterDao.getCurrent());
-                pstmt.setInt(11,scooterDao.getSpeed());
-                pstmt.setInt(12,id);
+                pstmt.setString(10, scooterDao.getCurrent());
+                pstmt.setInt(11, scooterDao.getSpeed());
+                pstmt.setInt(12, id);
+                pstmt.setInt(13, scooterDao.getAltitude());
 
 
                 // 5. SQL 문장을 실행하고 결과를 리턴 - SQL 문장 실행 후, 변경된 row 수 int type 리턴
                 pstmt.executeUpdate();
+                return start;
             }
 
         } catch (SQLException e) {
@@ -88,6 +93,7 @@ public class ScooterRepo {
                 }
             }
         }
+        return start;
     }
 
     public ScooterInfo findScooter(String identity) {
