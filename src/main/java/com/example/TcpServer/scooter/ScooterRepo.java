@@ -44,7 +44,7 @@ public class ScooterRepo {
                 con = DriverManager.getConnection(url, user, pw);
 
                 // 3. PreParedStatement 객체 생성, 객체 생성시 SQL 문장 저장
-                if (activate_id != null && scooterDao.getPow().equals("01")) {
+                if (activate_id != 0) {
                     start = true;
                     pstmt = con.prepareStatement(saveDriveScooterState);
                     pstmt.setInt(14, activate_id);
